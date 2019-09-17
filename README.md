@@ -105,3 +105,147 @@ app.use(bodyParser.urlencoded({extended: false}));
 ![image](https://github.com/FanWorldBegin/nodejs-express-MongoDB-basic/blob/master/images/9.png)
 
 ![image](https://github.com/FanWorldBegin/nodejs-express-MongoDB-basic/blob/master/images/10.png)
+
+## 6.上传文件
+### 6.js
+```javascript
+var express = require('express');
+var bodyParser = require('body-parser');
+var fs = require('fs');
+
+var app = express();
+var multer = require('multer');
+
+//检查是否有文件夹
+var createFolder = function (folder) {
+  try {
+    fs.accessSync(folder);
+  } catch (e) {
+    //没有的话创建目录
+    fs.mkdirSync(folder);
+  }
+};
+
+var uploadFolder = './upload/';
+
+//将目录传给创建函数
+createFolder(uploadFolder);
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadFolder);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+var upload = multer({
+  storage: storage
+});
+
+// create application/json parser
+var jsonParser = bodyParser.json()
+
+// create application/x-www-form-urlencoded parser
+var urlencodedParser = bodyParser.urlencoded({
+  extended: false
+})
+
+app.get('/', function (req, res) {
+  console.dir(req.query);
+  res.send("home page: " + req.query.find);
+});
+
+app.get('/form', function (req, res) {
+  var form = fs.readFileSync('./6.form.html', {
+    encoding: "utf8"
+  });
+  res.send(form);
+});
+
+app.post('/', urlencodedParser, function (req, res) {
+  console.dir(req.body);
+  res.send(req.body.name);
+});
+
+app.post('/upload', upload.single('logo'), function (req, res) {
+  console.dir(req.file);
+  res.send({
+    'ret_code': 0
+  });
+});
+
+app.get('/profile/:id/user/:name', function (req, res) {
+  console.dir(req.params);
+  res.send("You requested to see a profile with the name of " + req.params.name);
+});
+
+app.get('/ab?cd', function (req, res) {
+  res.send('/ab?cd');
+})
+
+app.listen(3000);
+console.log('listening to port 3000');
+```
+### 6.form.html
+```javascript
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <h2>单图上传</h2>
+    <input type="file" name="logo">
+    <input type="submit" value="提交">
+  </form>
+</body>
+
+</html>
+```
+
+把文件上传到服务器中 
+ enctype="multipart/form-data" 使用form-data格式来处理数据 可以上传文件
+ ### 1. 读取表单使用流知识
+```javascript
+var fs = require('fs');
+
+app.get('/form', function (req, res) {
+  var form = fs.readFileSync('./form.html', {
+    encoding: "utf8"
+  });
+  res.send(form);
+});
+
+```
+![image](https://github.com/FanWorldBegin/nodejs-express-MongoDB-basic/blob/master/images/11.png)
+form action="/upload" 
+点击提交到upload 路由下
+
+## 2. 使用一个新的库multer 处理文件上传
+upload.single('logo') 名字为input的name
+```javascript
+var multer = require('multer')
+
+// 指定上传目录，当前目录下的uploads
+var upload = multer({
+  dest: 'uploads/'
+})
+
+
+app.post('/upload', upload.single('logo'), function (req, res) {
+  console.dir(req.file);
+  res.send({
+    'ret_code': 0
+  });
+});
+```
+点击提交发现创建文件夹，上传成功
+![image](https://github.com/FanWorldBegin/nodejs-express-MongoDB-basic/blob/master/images/11.png)
