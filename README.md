@@ -337,3 +337,52 @@ form.ejs
 ```
 
 ### 3.公共模板
+    <%- include('./header.ejs') -%>
+
+
+## 9.中间件
+中间件是在请求和响应之间，进行处理，就是中间件的作用，一个中间件处理完后，传给下一个中间件。
+请求浏览器发送一个请求到浏览器。响应服务器把一些内容格式化后响应给浏览器
+```javascript
+app.get('/', function(req, res, next) {
+    res.send('ok');
+})
+```
+
+### 9.js
+```javascript
+var app = express();
+//中间件
+app.use(function (req, res, next) {
+  console.log('first middleware');
+  next(); //传给下一个中间件，没有next则停在这里
+  console.log('first middleware after');
+})
+
+app.use('/home', function (req, res, next) {
+  console.log('second middleware');
+  res.send('ok');
+})
+
+app.get('/', function(req, res, next) {
+    res.send('ok');
+})
+
+app.listen(3000);
+console.log('listening to port 3000');
+```
+
+### 响应静态文件
+* 静态文件放在public目录中，相当于设置public为根目录，访问直接写文件名称就可以。
+* 直接访问localhost:3000/a.png
+```javascript
+// 静态文件放在public文件夹中 
+app.use(express.static('public'));
+```
+*  创建一个虚假的目录前缀
+*  访问直接访问localhost:3000/assets/a.png
+```javascript
+// 静态文件放在public文件夹中 
+app.use('/assets', express.static('public'));
+```
+
