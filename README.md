@@ -248,4 +248,92 @@ app.post('/upload', upload.single('logo'), function (req, res) {
 });
 ```
 点击提交发现创建文件夹，上传成功
-![image](https://github.com/FanWorldBegin/nodejs-express-MongoDB-basic/blob/master/images/11.png)
+![image](https://github.com/FanWorldBegin/nodejs-express-MongoDB-basic/blob/master/images/12.png)
+
+## 7.模板引擎介
+### 1. express 中提供方法可以直接返回html文件
+* 可以直接使用sendFile来读取html 不需要使用流读取
+* ![image](https://github.com/FanWorldBegin/nodejs-express-MongoDB-basic/blob/master/images/13.png)
+
+### 2. 使用EJS模版引擎 给html传入动态数据
+exprss默认指定的是pug
+* npm install pug --save
+* npm install ejs --save
+
+### 3.设置模板位置
+```javascript
+//设置模板引擎
+app.set('view engine', 'ejs');
+//设置模板引擎目录
+app.set('views', __dirname +'/7.views')
+```
+![image](https://github.com/FanWorldBegin/nodejs-express-MongoDB-basic/blob/master/images/14.png)
+
+### 4. render form为模板名称。 render 将模板渲染出来
+
+```javascript
+app.get('/form/:name', function (req, res) {
+  var person = req.params.name;
+  //form html名字
+  res.render('form', {
+    person: person
+  });
+});
+```
+
+
+## 8.更多模版引擎使用
+
+### 1.向模板引擎中传入对象
+
+### 1. 8.js
+```javascript
+app.get('/form/:name', function (req, res) {
+  var data = {
+    age: 29,
+    job: "programmer",
+    hobbie: ['eating', 'fighting', 'fishing']
+  };
+  res.render('form', {
+    data: data
+  });
+});
+```
+
+### 2. 使用forEach循环语句
+form.ejs 
+```javascript
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+    <%- include('./header.ejs') -%>
+  <h1>
+    <%= data.age %>
+    <h2>hobbie</h2>
+    <ul>
+      <% data.hobbie.forEach(function(item) { %>
+      <li>
+        <%= item %>
+      </li>
+      <% }) %>
+    </ul>
+  </h1>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <h2>单图上传</h2>
+    <input type="file" name="logo">
+    <input type="submit" value="提交">
+  </form>
+</body>
+
+</html>
+```
+
+### 3.公共模板
